@@ -57,8 +57,6 @@ services:
     links:
       - "node"
       - "db"
-    ports:
-      - "8080:8080"
     restart: unless-stopped
     logging:
       options:
@@ -77,7 +75,7 @@ services:
   exapi:
     build:
       context: ./explorer-backend/9.4.3
-      dockerfile: explorer-backend.Dockerfile
+      dockerfile: explorer-api.Dockerfile
     env_file:
       # Defines POSTGRES_PASSWORD
       - ./explorer-backend/db/db.secret
@@ -89,6 +87,8 @@ services:
       - "db"
       - "redis"
     restart: unless-stopped
+    ports:
+      - 127.0.0.1:8080:8080
     logging:
       options:
         max-size: "10m"
@@ -107,8 +107,6 @@ services:
       - ./explorer-backend/db/db.secret
     links:
       - "db"
-    ports:
-      - "8080:8080"
     restart: unless-stopped
     logging:
       options:
