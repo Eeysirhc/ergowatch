@@ -3,6 +3,8 @@ version: "3.8"
 volumes:
   ew_node:
     external: true
+  ew_redis:
+    external: true
 
 services:
   # Ergo blockchain node
@@ -55,6 +57,37 @@ services:
     links:
       - "node"
       - "db"
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    image: redis:latest
+    restart: always
+    command: ["redis-server"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ew_redis:/usr/local/etc/redis
+
+  exapi:
+    build:
+      context: ./explorer-backend/9.4.3
+      dockerfile: explorer-backend.Dockerfile
+    env_file:
+      # Defines POSTGRES_PASSWORD
+      - ./explorer-backend/db/db.secret
+    volumes:
+      - ./explorer-backend/conf/explorer-backend.conf:/explorer-backend.conf:ro
+    command: /explorer-backend.conf
+    links:
+      - "node"
+      - "db"
+      - "redis"
     restart: unless-stopped
     logging:
       options:
@@ -74,6 +107,8 @@ services:
       - ./explorer-backend/db/db.secret
     links:
       - "db"
+    ports:
+      - "8080:8080"
     restart: unless-stopped
     logging:
       options:
